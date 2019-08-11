@@ -3,11 +3,14 @@ import Enzyme, {shallow} from 'enzyme';
 import EnzymeAdapter from 'enzyme-adapter-react-16';
 
 import App from './App';
+import { wrap } from 'module';
 
 Enzyme.configure({adapter: new EnzymeAdapter() });
 
 const setup = (props={}, state=null) => {
-    return shallow(<App {...props}/>)
+    const wrapper =  shallow(<App {...props}/>)
+    if (state) wrapper.setState(state);
+    return wrapper;
 }
 
 const findByTestAttr = (wrapper, val) => {
@@ -33,9 +36,20 @@ test('renders counter display', () =>{
 })
 
 test('counter starts at 0', () => {
-
+    const wrapper = setup();
+    const initialCounterState = wrapper.state('counter');
+    expect(initialCounterState).toBe(0);
 })
 
 test('clicking button increments counter display', () => {
+    const counter = 7;
+    const wrapper = setup(null, {counter});
+    const appComponent = findByTestAttr(wrapper, 'increment-button');
+    appComponent.simulate('click')
+    wrapper.update();
+
+    const counterDisplay = findByTestAttr(wrapper, 'counter-display');
+    expect(counterDisplay.text()).toContain(counter + 1)
+
 
 })
